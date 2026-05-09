@@ -27,9 +27,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-tiktok-dark flex">
+    <div className="min-h-screen bg-background flex">
       <Sidebar page={page} setPage={setPage} open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <Header />
         <main className="flex-1 p-6 overflow-y-auto">
           {renderPage()}

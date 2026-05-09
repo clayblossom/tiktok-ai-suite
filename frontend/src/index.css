@@ -2,27 +2,176 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  body {
+    @apply font-sans text-surface-800 bg-surface-50 antialiased;
+  }
 }
 
 @layer components {
+  /* Cards */
   .card {
-    @apply bg-tiktok-card rounded-xl p-4 border border-gray-800 shadow-lg;
+    @apply bg-white rounded-xl shadow-card border border-surface-200 p-5 transition-all duration-200;
+  }
+  .card-hover {
+    @apply card hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+  .card-glow {
+    @apply card hover:shadow-glow;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-medium rounded-lg px-4 py-2.5 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply bg-tiktok-pink hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 active:bg-primary-800;
   }
   .btn-secondary {
-    @apply bg-tiktok-gray hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+    @apply btn bg-surface-100 text-surface-700 hover:bg-surface-200 focus:ring-surface-400 border border-surface-300;
   }
-  .btn-teal {
-    @apply bg-tiktok-blue hover:bg-teal-400 text-black font-medium py-2 px-4 rounded-lg transition-colors;
+  .btn-ghost {
+    @apply btn bg-transparent text-surface-600 hover:bg-surface-100 focus:ring-surface-400;
   }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+  .btn-success {
+    @apply btn bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full bg-white border border-surface-300 rounded-lg px-3.5 py-2.5 text-sm text-surface-800 placeholder-surface-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  }
+  .input-error {
+    @apply input border-red-500 focus:ring-red-500 focus:border-red-500;
+  }
+  .label {
+    @apply block text-sm font-medium text-surface-700 mb-1.5;
+  }
+  .textarea {
+    @apply input resize-none;
+  }
+  .select {
+    @apply input appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10;
+  }
+
+  /* Badges */
   .badge {
-    @apply text-xs font-medium px-2 py-0.5 rounded-full;
+    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
   }
-  .input-field {
-    @apply w-full bg-tiktok-gray border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-tiktok-pink;
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700;
   }
+  .badge-success {
+    @apply badge bg-emerald-100 text-emerald-700;
+  }
+  .badge-warning {
+    @apply badge bg-amber-100 text-amber-700;
+  }
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700;
+  }
+  .badge-info {
+    @apply badge bg-sky-100 text-sky-700;
+  }
+
+  /* Layout */
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-bold text-surface-900;
+  }
+  .page-subtitle {
+    @apply text-sm text-surface-500 mt-1;
+  }
+
+  /* Grid */
+  .grid-stats {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4;
+  }
+  .grid-cards {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5;
+  }
+
+  /* Tables */
+  .table-container {
+    @apply overflow-x-auto rounded-xl border border-surface-200;
+  }
+  .table {
+    @apply w-full text-sm text-left;
+  }
+  .table th {
+    @apply bg-surface-50 text-surface-600 font-medium px-4 py-3 border-b border-surface-200;
+  }
+  .table td {
+    @apply px-4 py-3 border-b border-surface-100;
+  }
+  .table tr:hover td {
+    @apply bg-surface-50;
+  }
+
+  /* Status dots */
+  .status-dot {
+    @apply w-2.5 h-2.5 rounded-full;
+  }
+  .status-active {
+    @apply status-dot bg-emerald-500;
+  }
+  .status-inactive {
+    @apply status-dot bg-surface-300;
+  }
+  .status-error {
+    @apply status-dot bg-red-500;
+  }
+
+  /* Progress bars */
+  .progress-bar {
+    @apply h-2 bg-surface-200 rounded-full overflow-hidden;
+  }
+  .progress-fill {
+    @apply h-full bg-primary-500 rounded-full transition-all duration-500;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-surface-200 rounded;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-400;
+}
+
+/* Custom animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
