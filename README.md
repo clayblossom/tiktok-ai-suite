@@ -8,6 +8,7 @@
 ![React](https://img.shields.io/badge/react-18+-cyan)
 
 ---
+<img width="1672" height="941" alt="coding 3" src="https://github.com/user-attachments/assets/610047ac-d4e0-413a-9d84-f4d633c8087d" />
 
 ## ✨ Features
 
