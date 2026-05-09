@@ -1,83 +1,102 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
 
+interface StatCard {
+  label: string;
+  value: string | number;
+  change: string;
+  trend: 'up' | 'down' | 'neutral';
+  icon: string;
+  color: string;
+}
+
+interface Activity {
+  id: number;
+  type: string;
+  title: string;
+  time: string;
+  icon: string;
+  status: 'success' | 'pending' | 'error';
+}
+
 export function Dashboard() {
   const [overview, setOverview] = useState<any>(null);
-  const [activity, setActivity] = useState<any[]>([]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
-  const [chatLoading, setChatLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.overview().then(setOverview).catch(() => {});
-    api.activity().then(setActivity).catch(() => {});
+    api.dashboard().then(setOverview).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const handleChat = async () => {
-    if (!chatInput.trim() || chatLoading) return;
-    const msg = chatInput.trim();
-    setChatInput('');
-    setChatHistory(prev => [...prev, { role: 'user', text: msg }]);
-    setChatLoading(true);
-    try {
-      const resp = await api.chat(msg);
-      setChatHistory(prev => [...prev, { role: 'assistant', text: resp.reply }]);
-    } catch {
-      setChatHistory(prev => [...prev, { role: 'assistant', text: 'Error processing request' }]);
-    }
-    setChatLoading(false);
-  };
-
-  const stats = [
-    { icon: '📁', label: 'Projects', value: overview?.total_projects || 0, trend: '+12%', color: 'bg-primary-50 text-primary-600' },
-    { icon: '✍️', label: 'Scripts', value: overview?.total_scripts || 0, trend: '+8%', color: 'bg-violet-50 text-violet-600' },
-    { icon: '🎬', label: 'Videos', value: overview?.total_videos || 0, trend: '+24%', color: 'bg-rose-50 text-rose-600' },
-    { icon: '🎙️', label: 'Voiceovers', value: overview?.total_voiceovers || 0, trend: '+15%', color: 'bg-amber-50 text-amber-600' },
-    { icon: '🎵', label: 'Sounds', value: overview?.total_sounds || 0, trend: '+6%', color: 'bg-emerald-50 text-emerald-600' },
-    { icon: '🛒', label: 'Products', value: overview?.total_products || 0, trend: '+3%', color: 'bg-cyan-50 text-cyan-600' },
+  const stats: StatCard[] = [
+    { label: 'Total Scripts', value: overview?.total_scripts ?? 0, change: '+12%', trend: 'up', icon: '✍️', color: 'from-blue-500 to-blue-600' },
+    { label: 'Videos Created', value: overview?.total_videos ?? 0, change: '+8%', trend: 'up', icon: '🎬', color: 'from-purple-500 to-purple-600' },
+    { label: 'Voice Clips', value: overview?.total_sounds ?? 0, change: '+23%', trend: 'up', icon: '🎙️', color: 'from-pink-500 to-pink-600' },
+    { label: 'Products', value: overview?.total_products ?? 0, change: '+5%', trend: 'up', icon: '🛒', color: 'from-emerald-500 to-emerald-600' },
+    { label: 'API Cost Today', value: `$${overview?.api_cost_today?.toFixed(2) ?? '0.00'}`, change: '-15%', trend: 'down', icon: '💰', color: 'from-amber-500 to-amber-600' },
+    { label: 'Projects', value: overview?.total_projects ?? 0, change: '+2', trend: 'up', icon: '📁', color: 'from-cyan-500 to-cyan-600' },
   ];
 
-  const weeklyData = [
-    { day: 'Mon', scripts: 4, videos: 2, views: 12500 },
-    { day: 'Tue', scripts: 6, videos: 3, views: 18200 },
-    { day: 'Wed', scripts: 3, videos: 1, views: 9800 },
-    { day: 'Thu', scripts: 8, videos: 4, views: 24500 },
-    { day: 'Fri', scripts: 5, videos: 2, views: 15600 },
-    { day: 'Sat', scripts: 2, videos: 1, views: 8900 },
-    { day: 'Sun', scripts: 7, videos: 3, views: 21300 },
+  const activities: Activity[] = [
+    { id: 1, type: 'script', title: 'Generated "AI Trends 2026" script', time: '2 min ago', icon: '✍️', status: 'success' },
+    { id: 2, type: 'voice', title: 'Voice clip rendered (ElevenLabs)', time: '15 min ago', icon: '🎙️', status: 'success' },
+    { id: 3, type: 'video', title: 'Video export queued', time: '1 hour ago', icon: '🎬', status: 'pending' },
+    { id: 4, type: 'shop', title: 'Product listing updated', time: '3 hours ago', icon: '🛒', status: 'success' },
+    { id: 5, type: 'sound', title: 'AI music generation failed', time: '5 hours ago', icon: '🎵', status: 'error' },
   ];
-  const maxViews = Math.max(...weeklyData.map(d => d.views));
 
   const quickActions = [
-    { icon: '✍️', label: 'New Script', desc: 'Generate AI script', page: 'content' as Page },
-    { icon: '🎙️', label: 'Voice Over', desc: 'Text to speech', page: 'voice' as Page },
-    { icon: '🎬', label: 'Edit Video', desc: 'Upload & edit', page: 'video' as Page },
-    { icon: '🎵', label: 'Find Sound', desc: 'Trending sounds', page: 'sound' as Page },
-    { icon: '📊', label: 'Analytics', desc: 'View reports', page: 'dashboard' as Page },
-    { icon: '🛒', label: 'Shop Manager', desc: 'Products & sales', page: 'shop' as Page },
+    { label: 'Generate Script', desc: 'AI-powered TikTok scripts', icon: '✍️', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', action: 'content' },
+    { label: 'Create Voice', desc: 'Text-to-speech with AI', icon: '🎙️', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', action: 'voice' },
+    { label: 'Edit Video', desc: 'AI video editing tools', icon: '🎬', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20', action: 'video' },
+    { label: 'Browse Shop', desc: 'TikTok Shop manager', icon: '🛒', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', action: 'shop' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 bg-surface-200 rounded w-48" />
+        <div className="grid grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-32 bg-surface-200 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="page-header">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="page-title">Dashboard</h2>
-          <p className="page-subtitle">Welcome back! Here's your content overview.</p>
+          <h1 className="text-2xl font-bold text-surface-900">Dashboard</h1>
+          <p className="text-sm text-surface-500 mt-1">Welcome back! Here's what's happening with your content.</p>
         </div>
-        <button className="btn-primary">
-          ⚡ Quick Create
-        </button>
+        <div className="flex items-center gap-3">
+          <select className="select text-sm py-2">
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>This month</option>
+          </select>
+          <button className="btn-primary btn-sm">
+            <span>📊</span> Export Report
+          </button>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid-stats">
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {stats.map((stat, i) => (
-          <div key={i} className="card-hover group">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center text-lg`}>
+          <div key={i} className="card-hover group cursor-pointer">
+            <div className="flex items-start justify-between mb-3">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white text-lg shadow-lg group-hover:scale-110 transition-transform`}>
                 {stat.icon}
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{stat.trend}</span>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                stat.trend === 'up' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {stat.change}
+              </span>
             </div>
             <p className="text-2xl font-bold text-surface-900">{stat.value}</p>
             <p className="text-xs text-surface-500 mt-1">{stat.label}</p>
@@ -85,131 +104,126 @@ export function Dashboard() {
         ))}
       </div>
 
+      {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Weekly Performance Chart */}
+        {/* Activity feed */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-surface-900">📈 Weekly Performance</h3>
-            <div className="flex gap-4 text-xs">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 bg-primary-500 rounded-full" /> Scripts</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 bg-violet-500 rounded-full" /> Videos</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 bg-emerald-500 rounded-full" /> Views</span>
-            </div>
+            <h3 className="font-semibold text-surface-900">Recent Activity</h3>
+            <button className="btn-ghost btn-sm text-xs">View All</button>
           </div>
           <div className="space-y-3">
-            {weeklyData.map((d, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="text-xs text-surface-500 w-8">{d.day}</span>
-                <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 bg-surface-100 rounded-full h-6 overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full flex items-center justify-end pr-2"
-                      style={{ width: `${(d.views / maxViews) * 100}%` }}>
-                      <span className="text-[10px] text-white font-medium">{(d.views / 1000).toFixed(1)}K</span>
-                    </div>
-                  </div>
+            {activities.map(activity => (
+              <div key={activity.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-50 transition-colors group">
+                <div className="w-10 h-10 rounded-xl bg-surface-100 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  {activity.icon}
                 </div>
-                <div className="flex gap-1">
-                  <span className="badge-primary text-[10px]">{d.scripts}📝</span>
-                  <span className="badge-info text-[10px]">{d.videos}🎬</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-surface-800 truncate">{activity.title}</p>
+                  <p className="text-xs text-surface-400">{activity.time}</p>
                 </div>
+                <span className={`badge ${
+                  activity.status === 'success' ? 'badge-success' :
+                  activity.status === 'pending' ? 'badge-warning' : 'badge-danger'
+                }`}>
+                  {activity.status}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* AI Chat */}
-        <div className="card flex flex-col h-[420px]">
-          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-surface-100">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-violet-500 rounded-lg flex items-center justify-center text-white text-sm">🤖</div>
-            <div>
-              <h3 className="font-semibold text-surface-900 text-sm">AI Assistant</h3>
-              <p className="text-xs text-surface-400">Always ready to help</p>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto space-y-3 mb-3 px-1">
-            {chatHistory.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-3xl mb-2">💬</p>
-                <p className="text-sm text-surface-400">Ask me anything!</p>
-                <div className="mt-3 space-y-1">
-                  {['Generate a script', 'What\'s trending?', 'Create content plan'].map((q, i) => (
-                    <button key={i} onClick={() => { setChatInput(q); }} className="block w-full text-xs text-primary-600 bg-primary-50 rounded-lg px-3 py-1.5 hover:bg-primary-100">
-                      {q}
-                    </button>
-                  ))}
+        {/* Quick actions */}
+        <div className="card">
+          <h3 className="font-semibold text-surface-900 mb-4">Quick Actions</h3>
+          <div className="space-y-3">
+            {quickActions.map((action, i) => (
+              <button
+                key={i}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 hover:scale-[1.02] ${action.color}`}
+              >
+                <span className="text-2xl">{action.icon}</span>
+                <div className="text-left">
+                  <p className="text-sm font-medium">{action.label}</p>
+                  <p className="text-xs opacity-60">{action.desc}</p>
                 </div>
-              </div>
-            )}
-            {chatHistory.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
-                  msg.role === 'user'
-                    ? 'bg-primary-600 text-white rounded-br-md'
-                    : 'bg-surface-100 text-surface-800 rounded-bl-md'
-                }`}>
-                  {msg.text}
-                </div>
-              </div>
+                <span className="ml-auto opacity-40">→</span>
+              </button>
             ))}
-            {chatLoading && (
-              <div className="flex items-center gap-2 text-surface-400 text-sm">
-                <div className="flex gap-1"><span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce" /><span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0.1s]" /><span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0.2s]" /></div>
-                Thinking...
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2 pt-2 border-t border-surface-100">
-            <input value={chatInput} onChange={e => setChatInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleChat()}
-              placeholder="Ask the AI..." className="input text-sm" />
-            <button onClick={handleChat} disabled={chatLoading || !chatInput.trim()} className="btn-primary">➤</button>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Performance chart placeholder */}
       <div className="card">
-        <h3 className="font-semibold text-surface-900 mb-4">⚡ Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {quickActions.map((action, i) => (
-            <button key={i} className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-primary-50 transition-colors group">
-              <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
-              <span className="text-sm font-medium text-surface-700">{action.label}</span>
-              <span className="text-xs text-surface-400">{action.desc}</span>
-            </button>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-surface-900">Content Performance</h3>
+          <div className="flex items-center gap-2">
+            <button className="btn-ghost btn-sm text-xs">Scripts</button>
+            <button className="btn-ghost btn-sm text-xs">Videos</button>
+            <button className="btn-ghost btn-sm text-xs">Engagement</button>
+          </div>
+        </div>
+        {/* Simulated chart */}
+        <div className="h-48 flex items-end gap-2 px-4">
+          {[65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95, 70].map((h, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-500 hover:from-blue-400 hover:to-blue-300 cursor-pointer"
+                style={{ height: `${h}%` }}
+              />
+              <span className="text-[10px] text-surface-400">
+                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i]}
+              </span>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Activity Feed */}
-      <div className="card">
-        <h3 className="font-semibold text-surface-900 mb-4">📋 Recent Activity</h3>
-        {activity.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-3xl mb-2">📭</p>
-            <p className="text-sm text-surface-400">No activity yet. Start creating!</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {activity.slice(0, 8).map((a, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-50 transition-colors">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${
-                  a.type === 'script' ? 'bg-violet-50' : a.type === 'video' ? 'bg-rose-50' : 'bg-amber-50'
-                }`}>
-                  {a.type === 'script' ? '✍️' : a.type === 'video' ? '🎬' : '🎵'}
+      {/* API usage */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card">
+          <h3 className="font-semibold text-surface-900 mb-4">API Usage Today</h3>
+          <div className="space-y-3">
+            {[
+              { name: 'OpenAI', cost: 2.45, limit: 5, color: 'bg-emerald-500' },
+              { name: 'ElevenLabs', cost: 1.20, limit: 3, color: 'bg-purple-500' },
+              { name: 'Replicate', cost: 0.80, limit: 2, color: 'bg-blue-500' },
+              { name: 'Suno', cost: 0.50, limit: 1, color: 'bg-pink-500' },
+            ].map((api, i) => (
+              <div key={i}>
+                <div className="flex items-center justify-between text-sm mb-1">
+                  <span className="font-medium text-surface-700">{api.name}</span>
+                  <span className="text-surface-500">${api.cost.toFixed(2)} / ${api.limit}</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-surface-800">{a.title}</p>
-                  <p className="text-xs text-surface-400">{a.action}</p>
+                <div className="progress-bar">
+                  <div className={`progress-fill ${api.color}`} style={{ width: `${(api.cost / api.limit) * 100}%` }} />
                 </div>
-                <span className="text-xs text-surface-400">{a.timestamp?.split('T')[0]}</span>
               </div>
             ))}
           </div>
-        )}
+        </div>
+
+        <div className="card">
+          <h3 className="font-semibold text-surface-900 mb-4">System Status</h3>
+          <div className="space-y-3">
+            {[
+              { name: 'API Server', status: 'online', latency: '45ms' },
+              { name: 'Database', status: 'online', latency: '12ms' },
+              { name: 'AI Connectors', status: 'online', latency: '230ms' },
+              { name: 'Storage', status: 'online', latency: '8ms' },
+            ].map((service, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-surface-50">
+                <div className="flex items-center gap-3">
+                  <span className="status-active" />
+                  <span className="text-sm font-medium text-surface-700">{service.name}</span>
+                </div>
+                <span className="text-xs text-surface-400">{service.latency}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-type Page = 'dashboard' | 'content' | 'voice' | 'video' | 'sound' | 'shop';

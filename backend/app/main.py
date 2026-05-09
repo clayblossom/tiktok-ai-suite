@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="TikTok AI Creator Suite",
-    version="0.1.0",
+    version="0.2.0",
     description="All-in-one AI platform for TikTok creators.",
     lifespan=lifespan,
 )
@@ -40,6 +40,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Middleware stack (order matters: first added = outermost) ───────────────
+
+from .middleware.request_id import RequestIDMiddleware
+from .middleware.request_logger import RequestLoggingMiddleware
+from .middleware.rate_limiter import RateLimitMiddleware
+from .middleware.error_handler import ErrorHandlerMiddleware
+
+app.add_middleware(ErrorHandlerMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=120, requests_per_hour=2000)
+app.add_middleware(RequestIDMiddleware)
+
 
 # ── Health ──────────────────────────────────────────────────────────────────
 
@@ -47,7 +59,7 @@ app.add_middleware(
 async def health():
     return HealthResponse(
         status="ok",
-        version="0.1.0",
+        version="0.2.0",
         uptime_seconds=round(time.time() - START_TIME, 1),
         modules={
             "content_factory": True,
@@ -83,6 +95,10 @@ async def dashboard_overview():
 
 
 # ── Import & register sub-routers ──────────────────────────────────────────
+
+# Auth
+from .auth.routes import router as auth_router
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 
 # Content Factory
 from .modules.content_factory import router as content_router

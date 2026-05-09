@@ -1,26 +1,77 @@
 const API_BASE = '/api';
 
 async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = localStorage.getItem('access_token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const resp = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   });
+
+  if (resp.status === 401) {
+    // Token expired, try refresh
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+      const retryResp = await fetch(`${API_BASE}${path}`, { headers, ...options });
+      if (!retryResp.ok) throw new Error(`API error: ${retryResp.status}`);
+      return retryResp.json();
+    }
+    // Redirect to login
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    window.location.reload();
+    throw new Error('Session expired');
+  }
+
   if (!resp.ok) throw new Error(`API error: ${resp.status}`);
   return resp.json();
 }
 
+async function tryRefresh(): Promise<boolean> {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return false;
+
+  try {
+    const resp = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export const api = {
+  // Auth
+  login: (email: string, password: string) => fetchJson<any>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  }),
+  register: (email: string, password: string, display_name: string) => fetchJson<any>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, display_name }),
+  }),
+
   // Health
   health: () => fetchJson<any>('/health'),
 
   // Dashboard
-  overview: () => fetchJson<any>('/dashboard/overview'),
+  dashboard: () => fetchJson<any>('/dashboard/overview'),
   calendar: (month?: string) => fetchJson<any>(`/dashboard/calendar${month ? `?month=${month}` : ''}`),
   activity: () => fetchJson<any[]>('/dashboard/activity'),
-  chat: (message: string) => fetchJson<any>('/dashboard/chat', {
-    method: 'POST',
-    body: JSON.stringify({ message }),
-  }),
 
   // Content Factory
   generateScript: (data: any) => fetchJson<any>('/content/scripts/generate', {
@@ -33,7 +84,7 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  contentTemplates: () => fetchJson<any[]>('/content/templates'),
+  contentTemplates: () => fetchJson<any[]>('/content/content-templates'),
 
   // Voice
   generateVoice: (data: any) => fetchJson<any>('/voice/generate', {
@@ -57,7 +108,6 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  videoTemplates: () => fetchJson<any[]>('/videos/templates'),
 
   // Sound
   trendingSounds: () => fetchJson<any[]>('/sounds/trending'),
@@ -72,10 +122,6 @@ export const api = {
   createProduct: (data: any) => fetchJson<any>('/shop/products', {
     method: 'POST',
     body: JSON.stringify(data),
-  }),
-  researchProducts: (category?: string) => fetchJson<any>('/shop/products/research', {
-    method: 'POST',
-    body: JSON.stringify({ category }),
   }),
   generateListing: (data: any) => fetchJson<any>('/shop/listings/generate', {
     method: 'POST',
