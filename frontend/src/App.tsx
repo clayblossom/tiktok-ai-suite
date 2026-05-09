@@ -7,9 +7,10 @@ import { VoiceStudio } from './pages/VoiceStudio';
 import { VideoEditor } from './pages/VideoEditor';
 import { SoundAnalyzer } from './pages/SoundAnalyzer';
 import { ShopManager } from './pages/ShopManager';
+import { GrowthOS } from './pages/GrowthOS';
 import { LoginPage } from './pages/LoginPage';
 
-type Page = 'dashboard' | 'content' | 'voice' | 'video' | 'sound' | 'shop';
+type Page = 'dashboard' | 'growth' | 'content' | 'voice' | 'video' | 'sound' | 'shop';
 
 function App() {
   const [page, setPage] = useState<Page>('dashboard');
@@ -43,6 +44,7 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <Dashboard />;
+      case 'growth': return <GrowthOS />;
       case 'content': return <ContentFactory />;
       case 'voice': return <VoiceStudio />;
       case 'video': return <VideoEditor />;

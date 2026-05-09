@@ -72,6 +72,17 @@ export const api = {
   dashboard: () => fetchJson<any>('/dashboard/overview'),
   calendar: (month?: string) => fetchJson<any>(`/dashboard/calendar${month ? `?month=${month}` : ''}`),
   activity: () => fetchJson<any[]>('/dashboard/activity'),
+  trendRadar: (niche: string, topic: string) => fetchJson<any>(`/dashboard/trend-radar?niche=${encodeURIComponent(niche)}&topic=${encodeURIComponent(topic)}`),
+  viralScore: (data: any) => fetchJson<any>('/dashboard/viral-score', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  abTests: (topic: string, niche: string, variants = 5) => fetchJson<any>(`/dashboard/ab-tests?topic=${encodeURIComponent(topic)}&niche=${encodeURIComponent(niche)}&variants=${variants}`),
+  oneClick: (data: any) => fetchJson<any>('/dashboard/one-click', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  strategyCalendar: (niche: string, days = 30) => fetchJson<any>(`/dashboard/strategy-calendar?niche=${encodeURIComponent(niche)}&days=${days}`),
 
   // Content Factory
   generateScript: (data: any) => fetchJson<any>('/content/scripts/generate', {
@@ -108,6 +119,8 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+  videoTemplates: () => fetchJson<any[]>('/videos/templates'),
+
 
   // Sound
   trendingSounds: () => fetchJson<any[]>('/sounds/trending'),
@@ -119,6 +132,7 @@ export const api = {
 
   // Shop
   listProducts: () => fetchJson<any[]>('/shop/products'),
+  researchProducts: () => fetchJson<any>('/shop/products/research', { method: 'POST' }),
   createProduct: (data: any) => fetchJson<any>('/shop/products', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -128,4 +142,8 @@ export const api = {
     body: JSON.stringify(data),
   }),
   shopAnalytics: () => fetchJson<any>('/shop/analytics'),
+  productContentEngine: (data: any) => fetchJson<any>('/shop/products/content-engine', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
 };

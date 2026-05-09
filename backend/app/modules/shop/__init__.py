@@ -10,6 +10,7 @@ from ...db import insert_row, get_row, get_rows, update_row, delete_row
 from ...models import Product, ListingRequest, ListingResponse, ShopAnalytics
 from ...connectors.openai_client import generate_listing
 from ...config import OPENAI_API_KEY
+from ..growth_engine import generate_product_content
 
 router = APIRouter()
 
@@ -118,6 +119,21 @@ async def generate_product_listing(req: ListingRequest):
         tags=["tiktokmademebuyit", "trending", "musthave"],
         seo_keywords=[req.product_name.lower(), "tiktok", "trending"],
     )
+
+
+@router.post("/products/content-engine")
+async def product_content_engine(product: dict):
+    """Generate conversion-focused TikTok content ideas for a product."""
+    return generate_product_content(product)
+
+
+@router.get("/products/{product_id}/content-engine")
+async def product_content_engine_for_saved(product_id: int):
+    """Generate conversion content ideas for a saved product."""
+    product = get_row("products", product_id)
+    if not product:
+        raise HTTPException(404, "Product not found")
+    return generate_product_content(product)
 
 
 @router.get("/analytics")

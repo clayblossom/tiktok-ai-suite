@@ -1,4 +1,4 @@
-type Page = 'dashboard' | 'content' | 'voice' | 'video' | 'sound' | 'shop';
+type Page = 'dashboard' | 'growth' | 'content' | 'voice' | 'video' | 'sound' | 'shop';
 
 interface Props {
   page: Page;
@@ -10,6 +10,7 @@ interface Props {
 
 const navItems: { id: Page; icon: string; label: string; desc: string }[] = [
   { id: 'dashboard', icon: '📊', label: 'Dashboard', desc: 'Overview & analytics' },
+  { id: 'growth', icon: '🚀', label: 'Growth OS', desc: 'Trends, scoring & strategy' },
   { id: 'content', icon: '✍️', label: 'Content Factory', desc: 'AI script generation' },
   { id: 'voice', icon: '🎙️', label: 'Voice Studio', desc: 'Text-to-speech' },
   { id: 'video', icon: '🎬', label: 'Video Editor', desc: 'Edit & export' },
@@ -77,7 +78,7 @@ export function Sidebar({ page, setPage, open, onToggle, darkMode }: Props) {
               💡 Pro Tip
             </p>
             <p className={`text-xs mt-1 ${darkMode ? 'text-blue-300/60' : 'text-primary-600'}`}>
-              Use AI to generate scripts first, then add voice and video!
+              Start with Growth OS to pick a trend before creating scripts.
             </p>
           </div>
         )}

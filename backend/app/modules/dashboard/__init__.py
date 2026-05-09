@@ -10,6 +10,14 @@ from ...db import insert_row, get_rows, count_rows, get_api_usage_today
 from ...models import ChatRequest, ChatResponse
 from ...connectors.openai_client import chat_completion
 from ...config import OPENAI_API_KEY
+from ..growth_engine import (
+    build_brand_profile,
+    generate_ab_test_plan,
+    generate_content_calendar,
+    generate_one_click_blueprint,
+    generate_trend_radar,
+    score_content,
+)
 
 router = APIRouter()
 
@@ -97,6 +105,48 @@ async def get_activity(limit: int = 20):
     # Sort by timestamp
     activities.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
     return activities[:limit]
+
+
+@router.get("/trend-radar")
+async def trend_radar(niche: str = "general", topic: str = ""):
+    """TikTok-native trend intelligence by niche/topic."""
+    return generate_trend_radar(niche=niche, topic=topic)
+
+
+@router.post("/viral-score")
+async def viral_score(payload: dict):
+    """Score a script/video package before publishing."""
+    return score_content(payload)
+
+
+@router.get("/ab-tests")
+async def ab_tests(topic: str, niche: str = "general", variants: int = 5):
+    """Generate hook/caption/cover variants for A/B testing."""
+    return generate_ab_test_plan(topic=topic, niche=niche, variants=variants)
+
+
+@router.post("/one-click")
+async def one_click(payload: dict):
+    """Create an end-to-end TikTok video blueprint from one prompt."""
+    return generate_one_click_blueprint(
+        niche=payload.get("niche", "general"),
+        topic=payload.get("topic", ""),
+        tone=payload.get("tone", "casual"),
+        duration=int(payload.get("duration", 30)),
+        brand=payload.get("brand") or {},
+    )
+
+
+@router.post("/brand-profile")
+async def brand_profile(payload: dict):
+    """Normalize brand memory for creator strategy."""
+    return build_brand_profile(payload)
+
+
+@router.get("/strategy-calendar")
+async def strategy_calendar(niche: str = "general", days: int = 30):
+    """Generate a balanced content strategy calendar."""
+    return generate_content_calendar(niche=niche, days=days)
 
 
 @router.post("/chat", response_model=ChatResponse)
