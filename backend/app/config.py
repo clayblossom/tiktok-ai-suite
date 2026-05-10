@@ -1,6 +1,9 @@
 """TikTok AI Creator Suite — Configuration."""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,6 +23,12 @@ for d in [DATA_DIR, VIDEOS_DIR, AUDIO_DIR, IMAGES_DIR, TEMP_DIR]:
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", "8800"))
 DEBUG = os.getenv("DEBUG", "true").lower() == "true"
+
+# JWT Authentication
+SECRET_KEY = os.getenv("SECRET_KEY", "tiktok-ai-suite-secret-key-change-in-production")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
 # OpenAI (script generation, chat)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
